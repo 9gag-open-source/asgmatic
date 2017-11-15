@@ -1,0 +1,19 @@
+# Regions to scan for autoscaling groups
+regions:
+  - us-west-1
+  - us-east-1
+
+# Command templates for the commands generated
+commands:
+  upgrade: run-aws-cmd update-launch-config {{ .Region }} {{ .Name }} lc-{{ .Name | trim_prefix "asg-" }}-{{ .AmiName | trim_prefix "ami-" }}-1 {{ .AmiID }} {{ .InstanceType }}
+
+# Mappings for AMI versions.
+#
+# Format is as follows:
+#  ami-original: ami-replacement
+#
+# Mappings are resolved to the latest version, so there is no need to
+# Rewrite old mappings to apply the latest AMI
+mappings:
+  ami-4592a025: ami-014f7261
+  ami-014f7261: ami-d9457ab9

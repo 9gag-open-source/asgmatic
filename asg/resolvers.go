@@ -34,11 +34,11 @@ func resolveAmiNames(svc *ec2.EC2, a []*Asg) error {
 	cache := newCache()
 
 	for _, i := range a {
-		n, err := resolveAmiName(svc, &cache, i.NewAmiID)
+		n, err := resolveAmiName(svc, &cache, i.AmiID)
 		if err != nil {
-			return errors.Wrap(err, fmt.Sprintf("failed to resolve ami %s", i.NewAmiID))
+			return errors.Wrap(err, fmt.Sprintf("failed to resolve ami %s", i.AmiID))
 		}
-		i.NewAmiName = n
+		i.AmiName = n
 	}
 
 	return nil
@@ -99,10 +99,18 @@ func resolveLaunchConfig(svc *autoscaling.AutoScaling, toResolve []*Asg) error {
 		}
 
 		for _, a := range as {
-			a.AmiID = *lc.ImageId
+			a.CurrentAmiID = *lc.ImageId
 			a.InstanceType = *lc.InstanceType
 		}
 	}
 
 	return nil
+}
+
+func resolveLatestAmi(amis map[string]string, amiID string) string {
+	id, ok := amis[amiID]
+	if !ok || id == amiID {
+		return amiID
+	}
+	return resolveLatestAmi(amis, id)
 }

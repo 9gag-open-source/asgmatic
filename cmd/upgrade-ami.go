@@ -14,48 +14,37 @@ import (
 // upgradeCmd represents the upgrade command
 var upgradeAmiCmd = &cobra.Command{
 	Use:   "upgrade-ami",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "generate upgrade commands for autoscaling groups",
+	Long: `Generates upgrade commands for autoscaling groups based 
+on command template in mappings file. Will traverse all
+given regions and will generate commands for latest AMI
+only.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var mappings asg.ConfigData
+		var config ConfigData
 
-		contents, err := ioutil.ReadFile("maps.yaml")
+		contents, err := ioutil.ReadFile(mappingsFile)
 		if err != nil {
 			fmt.Printf("unable to read mappings: %v\n", err)
 			os.Exit(1)
 		}
 
-		err = yaml.Unmarshal(contents, &mappings)
+		err = yaml.Unmarshal(contents, &config)
 		if err != nil {
 			fmt.Printf("failed to parse mappings yaml: %v\n", err)
 			os.Exit(1)
 		}
 
-		err = asg.GenerateASGTemplates(mappings)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+		for _, region := range config.Regions {
+			err = asg.GenerateASGTemplates(region, config.Commands["upgrade"], config.Mappings, os.Stdout)
+
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 		}
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(upgradeAmiCmd)
-
-	upgradeAmiCmd.PersistentFlags().String("mappings-file", "mappings.yaml", "Location for mappings file")
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// upgradeCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// upgradeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

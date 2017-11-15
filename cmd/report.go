@@ -14,17 +14,13 @@ import (
 // reportCmd represents the report command
 var reportCmd = &cobra.Command{
 	Use:   "report",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Generate report of unmapped AMIs",
+	Long: `Walk all in use launch configurations and report AMIs
+that are in use and don't have a mapping in mappings file.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var mappings asg.ConfigData
+		var mappings ConfigData
 
-		contents, err := ioutil.ReadFile("maps.yaml")
+		contents, err := ioutil.ReadFile(mappingsFile)
 		if err != nil {
 			fmt.Printf("unable to read mappings: %v\n", err)
 			os.Exit(1)
@@ -36,24 +32,16 @@ to quickly create a Cobra application.`,
 			os.Exit(1)
 		}
 
-		err = asg.ReportUnknownAmis(mappings)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+		for _, region := range mappings.Regions {
+			err = asg.ReportUnknownAmis(region, mappings.Mappings, os.Stdout)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 		}
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(reportCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// reportCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// reportCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

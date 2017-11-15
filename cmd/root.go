@@ -10,20 +10,22 @@ import (
 )
 
 var cfgFile string
+var mappingsFile string
+
+// ConfigData holds the basic configuration needed for ASG fetching
+type ConfigData struct {
+	Regions  []string
+	Commands map[string]string
+	Mappings map[string]string
+}
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "asgmatic",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	Short: "Queries and generates upgrade commands for AWS ASGs",
+	Long: `ASG-Matic is a tool to automate some tedious tasks with
+AWS management. It aims to be self contained and easily
+manageable.`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -43,9 +45,8 @@ func init() {
 	// will be global for your application.
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.asgmatic.yaml)")
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	RootCmd.PersistentFlags().StringVar(&mappingsFile, "mappings-file", "mappings.yaml", "Location for mappings file")
+	viper.BindPFlag("mappings", RootCmd.PersistentFlags().Lookup("mappings-file"))
 }
 
 // initConfig reads in config file and ENV variables if set.
