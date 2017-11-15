@@ -10,7 +10,6 @@ import (
 )
 
 var cfgFile string
-var mappingsFile string
 
 // ConfigData holds the basic configuration needed for ASG fetching
 type ConfigData struct {
@@ -45,8 +44,8 @@ func init() {
 	// will be global for your application.
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.asgmatic.yaml)")
 
-	RootCmd.PersistentFlags().StringVar(&mappingsFile, "mappings-file", "mappings.yaml", "Location for mappings file")
-	viper.BindPFlag("mappings", RootCmd.PersistentFlags().Lookup("mappings-file"))
+	RootCmd.PersistentFlags().String("mappings-file", "mappings.yaml", "Location for mappings file")
+	viper.BindPFlag("mappingsFile", RootCmd.PersistentFlags().Lookup("mappings-file"))
 }
 
 // initConfig reads in config file and ENV variables if set.
