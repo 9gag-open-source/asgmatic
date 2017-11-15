@@ -11,8 +11,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Asg is used to collect data from AWS
-type Asg struct {
+// asgInfo is used to collect data from AWS
+type asgInfo struct {
 	Region, Name, LaunchConfig, InstanceType, CurrentAmiID, AmiID, AmiName string
 }
 
@@ -96,8 +96,8 @@ func ReportUnknownAmis(region string, mappings map[string]string, output io.Writ
 	return nil
 }
 
-func amiNamesToResolve(a *[]Asg) []*Asg {
-	var toResolve []*Asg
+func amiNamesToResolve(a *[]asgInfo) []*asgInfo {
+	var toResolve []*asgInfo
 
 	for i, lc := range *a {
 		if lc.AmiID != "" && lc.AmiName == "" {
@@ -108,8 +108,8 @@ func amiNamesToResolve(a *[]Asg) []*Asg {
 	return toResolve
 }
 
-func launchConfigToResolve(a *[]Asg) []*Asg {
-	var toResolve []*Asg
+func launchConfigToResolve(a *[]asgInfo) []*asgInfo {
+	var toResolve []*asgInfo
 
 	for i, lc := range *a {
 		if lc.CurrentAmiID == "" {

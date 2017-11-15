@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func resolveAsg(svc *autoscaling.AutoScaling, region, q string) ([]Asg, error) {
+func resolveAsg(svc *autoscaling.AutoScaling, region, q string) ([]asgInfo, error) {
 	var input *autoscaling.DescribeAutoScalingGroupsInput
 	if q != "" {
 		input = &autoscaling.DescribeAutoScalingGroupsInput{
@@ -21,16 +21,16 @@ func resolveAsg(svc *autoscaling.AutoScaling, region, q string) ([]Asg, error) {
 		return nil, errors.Wrap(err, "unable to describe autoscaling groups")
 	}
 
-	var asgs []Asg
+	var asgs []asgInfo
 
 	for _, a := range result.AutoScalingGroups {
-		asgs = append(asgs, Asg{Region: region, Name: *a.AutoScalingGroupName, LaunchConfig: *a.LaunchConfigurationName})
+		asgs = append(asgs, asgInfo{Region: region, Name: *a.AutoScalingGroupName, LaunchConfig: *a.LaunchConfigurationName})
 	}
 
 	return asgs, nil
 }
 
-func resolveAmiNames(svc *ec2.EC2, a []*Asg) error {
+func resolveAmiNames(svc *ec2.EC2, a []*asgInfo) error {
 	cache := newCache()
 
 	for _, i := range a {
@@ -75,8 +75,8 @@ func newCache() amiCache                  { return amiCache{cache: make(map[stri
 func (c *amiCache) Get(key string) string { return c.cache[key] }
 func (c *amiCache) Set(key, value string) { c.cache[key] = value }
 
-func resolveLaunchConfig(svc *autoscaling.AutoScaling, toResolve []*Asg) error {
-	r := make(map[string][]*Asg)
+func resolveLaunchConfig(svc *autoscaling.AutoScaling, toResolve []*asgInfo) error {
+	r := make(map[string][]*asgInfo)
 	var names []*string
 
 	for _, a := range toResolve {
