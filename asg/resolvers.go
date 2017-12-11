@@ -16,15 +16,18 @@ func resolveAsg(svc *autoscaling.AutoScaling, region, q string) ([]asgInfo, erro
 		}
 	}
 
-	result, err := svc.DescribeAutoScalingGroups(input)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to describe autoscaling groups")
-	}
-
 	var asgs []asgInfo
 
-	for _, a := range result.AutoScalingGroups {
-		asgs = append(asgs, asgInfo{Region: region, Name: *a.AutoScalingGroupName, LaunchConfig: *a.LaunchConfigurationName})
+	cb := func(result *autoscaling.DescribeAutoScalingGroupsOutput, lastPage bool) bool {
+		for _, a := range result.AutoScalingGroups {
+			asgs = append(asgs, asgInfo{Region: region, Name: *a.AutoScalingGroupName, LaunchConfig: *a.LaunchConfigurationName})
+		}
+		return true
+	}
+
+	err := svc.DescribeAutoScalingGroupsPages(input, cb)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to describe autoscaling groups")
 	}
 
 	return asgs, nil
