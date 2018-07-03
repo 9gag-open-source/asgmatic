@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 	yaml "gopkg.in/yaml.v2"
 
-	"github.com/sami9gag/asgmatic/asg"
+	"github.com/9gag/asgmatic/asg"
 )
 
 // reportCmd represents the report command

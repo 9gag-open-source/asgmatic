@@ -1,7 +1,7 @@
 project_name: asgmatic
 release:
   github:
-    owner: sami9gag
+    owner: 9gag
     name: asgmatic
   name_template: '{{.Tag}}'
 builds:
